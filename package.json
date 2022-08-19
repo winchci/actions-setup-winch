@@ -1,5 +1,5 @@
 {
-  "name": "actions-setup-winch",
+  "name": "setup-winch",
   "version": "1.0.0",
   "private": true,
   "description": "Setup winch in a GitHub Actions build environment",
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/winchci/actions-setup-winch.git"
+    "url": "git+https://github.com/winchci/setup-winch.git"
   },
   "author": "Seth Yates",
   "license": "MIT",
