@@ -65,15 +65,13 @@ function run() {
             const owner = "winchci";
             const repo = "winch";
             const osPlatform = os.platform();
-            const osArch = os.arch();
-            let osMatch = [];
-            osMatch.push(osPlatform);
+            let osArch;
             switch (os.arch()) {
                 case "x64":
-                    osMatch.push("amd64");
+                    osArch = "amd64";
                     break;
                 default:
-                    osMatch.push(os.arch());
+                    osArch = os.arch();
                     return;
             }
             let getReleaseUrl;
@@ -84,7 +82,7 @@ function run() {
                 });
                 versionSpec = getReleaseUrl.data.name;
             }
-            let toolPath = tc.find('winch', versionSpec, osArch);
+            let toolPath = tc.find('winch', versionSpec, os.arch());
             if (toolPath) {
                 core.info(`Found in cache @ ${toolPath}`);
             }
@@ -96,13 +94,9 @@ function run() {
                         tag: versionSpec,
                     });
                 }
-                let osMatchRegexForm = `(${osMatch.join('|')})`;
-                let re = new RegExp(`${osMatchRegexForm}.*${osMatchRegexForm}.*\.(tar.gz|zip|tgz)`);
                 core.info(`resolved version ${versionSpec}`);
                 let asset = getReleaseUrl.data.assets.find(obj => {
-                    let normalizedObjName = obj.name.toLowerCase();
-                    core.info(`searching for ${normalizedObjName} with ${re.source}`);
-                    return re.test(normalizedObjName);
+                    return obj.name.toLowerCase() == `${osPlatform}-${osArch}.tgz`;
                 });
                 if (!asset) {
                     const found = getReleaseUrl.data.assets.map(f => f.name);
@@ -113,7 +107,7 @@ function run() {
                 core.info(`Downloading ${repo} ${versionSpec} from ${url}`);
                 const downloadPath = yield tc.downloadTool(url);
                 const extPath = yield extractFn(downloadPath);
-                toolPath = yield tc.cacheDir(extPath, 'winch', versionSpec, osArch);
+                toolPath = yield tc.cacheDir(extPath, 'winch', versionSpec, os.arch());
                 core.info(`Successfully extracted ${repo} ${versionSpec} to ${toolPath}`);
             }
             core.addPath(toolPath);

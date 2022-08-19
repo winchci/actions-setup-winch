@@ -42,18 +42,14 @@ async function run() {
         const owner = "winchci";
         const repo = "winch";
         const osPlatform = os.platform();
-        const osArch = os.arch();
-
-        let osMatch: string[] = [];
-
-        osMatch.push(osPlatform)
+        let osArch: string;
         switch (os.arch()) {
         case "x64":
-            osMatch.push("amd64")
+            osArch = "amd64";
             break;
 
         default:
-            osMatch.push(os.arch())
+            osArch = os.arch();
             return;
         }
 
@@ -66,7 +62,7 @@ async function run() {
             versionSpec = getReleaseUrl.data.name;
         }
 
-        let toolPath = tc.find('winch', versionSpec, osArch);
+        let toolPath = tc.find('winch', versionSpec, os.arch());
 
         if (toolPath) {
             core.info(`Found in cache @ ${toolPath}`);
@@ -79,14 +75,10 @@ async function run() {
                 });
             }
 
-            let osMatchRegexForm = `(${osMatch.join('|')})`
-            let re = new RegExp(`${osMatchRegexForm}.*${osMatchRegexForm}.*\.(tar.gz|zip|tgz)`)
             core.info(`resolved version ${versionSpec}`);
 
             let asset = getReleaseUrl.data.assets.find(obj => {
-                let normalizedObjName = obj.name.toLowerCase();
-                core.info(`searching for ${normalizedObjName} with ${re.source}`);
-                return re.test(normalizedObjName);
+                return obj.name.toLowerCase() == `${osPlatform}-${osArch}.tgz`;
             })
 
             if (!asset) {
@@ -102,7 +94,7 @@ async function run() {
             const downloadPath = await tc.downloadTool(url);
             const extPath = await extractFn(downloadPath);
 
-            toolPath = await tc.cacheDir(extPath, 'winch', versionSpec, osArch);
+            toolPath = await tc.cacheDir(extPath, 'winch', versionSpec, os.arch());
             core.info(`Successfully extracted ${repo} ${versionSpec} to ${toolPath}`);
         }
 
