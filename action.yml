@@ -1,0 +1,10 @@
+name: "Setup winch in GitHub Actions"
+description: "Setup winch in GitHub Actions"
+inputs:
+  version:
+    description: 'Winch version to use'
+    required: false
+    default: 'latest'
+runs:
+  using: "node16"
+  main: "dist/main.js"
